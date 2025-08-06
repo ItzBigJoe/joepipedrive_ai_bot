@@ -61,4 +61,6 @@ Reply to this email if it's good.
         smtp.login(os.getenv("YOUR_EMAIL"), os.getenv("EMAIL_APP_PASSWORD"))
         smtp.send_message(msg)
 
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
 
