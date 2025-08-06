@@ -1,17 +1,12 @@
 from flask import Flask, request, jsonify
 from openai import OpenAI
-import smtplib
-from email.message import EmailMessage
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
-# Initialize OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Initialize Flask app
 app = Flask(__name__)
 
 @app.route("/webhook", methods=["POST"])
@@ -19,50 +14,21 @@ def webhook():
     data = request.json
     subject = data.get("subject")
     body = data.get("body")
-    sender = data.get("from", {}).get("email_address")
-
-    if not subject or not body or not sender:
-        return jsonify({"error": "Missing required fields"}), 400
 
     try:
-        # Generate reply using GPT-4
         prompt = f"Reply to this email: {body}"
-        response = client.chat.completions.create(
+        chat_response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You're a helpful sales assistant."},
                 {"role": "user", "content": prompt}
             ]
         )
-        reply = response.choices[0].message.content
-
-        # Send the reply to your email for review
-        send_review_email(subject, body, reply, sender)
-
-        return jsonify({"status": "ok"}), 200
-
+        reply = chat_response.choices[0].message.content
+        return jsonify({"reply": reply}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-def send_review_email(subject, original, reply, lead_email):
-    msg = EmailMessage()
-    msg["Subject"] = f"AI Draft Reply for: {subject}"
-    msg["From"] = os.getenv("YOUR_EMAIL")
-    msg["To"] = os.getenv("YOUR_EMAIL")
-    msg["Reply-To"] = os.getenv("YOUR_EMAIL")
-    msg.set_content(f"""
-Original message from {lead_email}:
-{original}
-
---- AI Suggested Reply ---
-{reply}
-
-Reply to this email if it's good.
-""")
-
-    with smtplib.SMTP_SSL(os.getenv("GMAIL_SMTP_SERVER"), 465) as smtp:
-        smtp.login(os.getenv("YOUR_EMAIL"), os.getenv("EMAIL_APP_PASSWORD"))
-        smtp.send_message(msg)
-
+# 🔴 This was missing in your version
 if __name__ == "__main__":
     app.run(debug=True)
