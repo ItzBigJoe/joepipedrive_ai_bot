@@ -1,14 +1,17 @@
 from flask import Flask, request, jsonify
-import openai
+from openai import OpenAI
 import smtplib
 from email.message import EmailMessage
 import os
 from dotenv import load_dotenv
 
+# Load environment variables
 load_dotenv()
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Initialize OpenAI client
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
+# Initialize Flask app
 app = Flask(__name__)
 
 @app.route("/webhook", methods=["POST"])
@@ -22,18 +25,18 @@ def webhook():
         return jsonify({"error": "Missing required fields"}), 400
 
     try:
-        # Generate reply
+        # Generate reply using GPT-4
         prompt = f"Reply to this email: {body}"
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You're a helpful sales assistant."},
                 {"role": "user", "content": prompt}
             ]
         )
-        reply = response['choices'][0]['message']['content']
+        reply = response.choices[0].message.content
 
-        # Send to YOU for review
+        # Send the reply to your email for review
         send_review_email(subject, body, reply, sender)
 
         return jsonify({"status": "ok"}), 200
@@ -63,4 +66,3 @@ Reply to this email if it's good.
 
 if __name__ == "__main__":
     app.run(debug=True)
-
