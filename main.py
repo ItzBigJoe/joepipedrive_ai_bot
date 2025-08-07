@@ -21,7 +21,7 @@ def webhook():
     try:
         prompt = f"Reply to this email: {body}"
         chat_response = client.chat.completions.create(
-            model="gpt-4",
+            model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You're a helpful sales assistant."},
                 {"role": "user", "content": prompt}
