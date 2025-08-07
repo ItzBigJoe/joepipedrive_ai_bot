@@ -5,7 +5,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY")
+)
+
 
 app = Flask(__name__)
 
@@ -29,6 +32,5 @@ def webhook():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-# 🔴 This was missing in your version
 if __name__ == "__main__":
     app.run(debug=True)
