@@ -10,7 +10,7 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Preferred models in order of capability
-preferred_models = ["gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo"]
+preferred_models = ["gpt-4o", "gpt-4", "gpt-4o-mini", "gpt-3.5-turbo"]
 
 def get_first_available_model():
     """Check which preferred model is available for this API key."""
