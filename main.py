@@ -1,6 +1,7 @@
 # main.py
 
 from flask import Flask, request, jsonify
+from bs4 import BeautifulSoup
 from flask_cors import CORS
 from openai import OpenAI
 import os
@@ -172,7 +173,18 @@ def webhook():
 
     data = request.get_json(silent=True) or {}
     subject = data.get("subject", "").strip()
-    body = data.get("body", "").strip()
+    
+
+    raw_html = data.get("body", "").strip()
+    plain_text = data.get("body_plain", "").strip() if data.get("body_plain") else None
+    
+    if plain_text:
+        body = plain_text
+    else:
+        # Convert HTML to plain text
+        soup = BeautifulSoup(raw_html, "html.parser")
+        body = soup.get_text(separator="\n").strip()
+
     email_id = str(data.get("email_id", "") or (len(pending_drafts) + 1))
 
     if not body:
