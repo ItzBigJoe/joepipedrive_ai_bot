@@ -247,9 +247,11 @@ def webhook():
         # Save AI draft temporarily
         pending_drafts[email_id] = {
             "subject": subject,
-            "body": body,
+            "body_html": raw_html,
+            "body_clean": body,
             "ai_draft": ai_reply
         }
+
         save_all()
         print(f"📝 Draft generated for email_id={email_id}")
 
