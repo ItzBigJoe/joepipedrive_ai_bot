@@ -1,1 +1,23 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+.draft {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+}
+
+textarea {
+    width: 100%;
+    height: 120px;
+    margin-top: 5px;
+}
+
+button {
+    margin-top: 10px;
+    margin-right: 10px;
+}
 
