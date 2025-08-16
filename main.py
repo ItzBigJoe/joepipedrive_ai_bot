@@ -16,6 +16,7 @@ from db import init_db, save_reply as save_reply_sql
 # -----------------------------
 load_dotenv()
 
+MOCK_MODE = True  # <-- set to False to use real API
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not OPENAI_API_KEY:
     raise RuntimeError("OPENAI_API_KEY not set. Please add it to your environment or .env file.")
@@ -111,7 +112,11 @@ def save_all():
 # -----------------------------
 # Embeddings
 # -----------------------------
+
 def get_embedding(text: str) -> np.ndarray:
+    if MOCK_MODE:
+        # Just return a random vector of correct dimension
+        return np.random.rand(EMBED_DIM).astype(np.float32)
     text = (text or "").strip()
     try:
         emb = client.embeddings.create(
@@ -121,6 +126,17 @@ def get_embedding(text: str) -> np.ndarray:
         return np.asarray(emb, dtype=np.float32)
     except Exception as e:
         raise RuntimeError(f"Embedding failed: {e}")
+
+#def get_embedding(text: str) -> np.ndarray:
+   # text = (text or "").strip()
+    #try:
+       # emb = client.embeddings.create(
+            #model="text-embedding-3-small",
+           # input=text
+       # ).data[0].embedding
+     #   return np.asarray(emb, dtype=np.float32)
+    #except Exception as e:
+  #      raise RuntimeError(f"Embedding failed: {e}")
 
 def add_to_vector_db(subject: str, body: str, your_reply: str, ai_draft: str | None = None):
     """Store the final reply + (optionally) the AI's original draft for future learning."""
@@ -193,15 +209,28 @@ def webhook():
     prompt = "\n\n".join(prompt_sections)
 
     try:
-        chat_response = client.chat.completions.create(
-            model=model_to_use,
-            messages=[
-                {"role": "system", "content": "You're a helpful sales assistant who mimics my style."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.4
-        )
-        ai_reply = (chat_response.choices[0].message.content or "").strip()
+        if MOCK_MODE:
+            ai_reply = f"[MOCK REPLY] This is a fake AI reply for: {body[:50]}..."
+        else:
+            chat_response = client.chat.completions.create(
+                model=model_to_use,
+                messages=[
+                    {"role": "system", "content": "You're a helpful sales assistant who mimics my style."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.4
+            )
+            ai_reply = (chat_response.choices[0].message.content or "").strip()
+
+        #chat_response = client.chat.completions.create(
+        #    model=model_to_use,
+        #    messages=[
+          #      {"role": "system", "content": "You're a helpful sales assistant who mimics my style."},
+          #      {"role": "user", "content": prompt}
+           # ],
+           # temperature=0.4
+       # )
+       # ai_reply = (chat_response.choices[0].message.content or "").strip()
 
         # Save AI draft temporarily
         pending_drafts[email_id] = {
