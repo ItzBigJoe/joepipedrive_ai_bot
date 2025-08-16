@@ -287,6 +287,16 @@ def save_reply_route():
 
     save_all()
     return jsonify({"status": "saved", "diff": diff}), 200
+    
+@app.route("/")
+def index():
+    return app.send_static_file("index.html")  # serve from templates
+    
+@app.route("/pending-drafts", methods=["GET"])
+def get_pending_drafts():
+    return jsonify(pending_drafts)
+
+
 
 if __name__ == "__main__":
     init_db()
