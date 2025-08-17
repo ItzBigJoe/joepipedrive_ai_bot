@@ -108,10 +108,11 @@ def _atomic_pickle_dump(obj, path):
 FAISS_INDEX_FILE = "index.faiss"
 
 def save_all():
-    faiss.write_index(index, FAISS_INDEX_FILE) 
-    
+    # ensure path is always a string
+    faiss.write_index(index, str(FAISS_INDEX_FILE))
     _atomic_pickle_dump(metadata, METADATA_FILE)
     _atomic_pickle_dump(pending_drafts, DRAFTS_FILE)
+print("FAISS_INDEX_FILE:", FAISS_INDEX_FILE, type(FAISS_INDEX_FILE))
 
 # -----------------------------
 # Embeddings
