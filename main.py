@@ -27,7 +27,7 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 # -----------------------------
 # Files & constants
 # -----------------------------
-FAISS_INDEX_FILE = "vector_index.faiss"
+FAISS_INDEX_FILE = "index.faiss"
 METADATA_FILE = "vector_metadata.pkl"
 DRAFTS_FILE = "pending_drafts.pkl"
 EMBED_DIM = 1536  # text-embedding-3-small = 1536 dims
@@ -105,7 +105,7 @@ def _atomic_pickle_dump(obj, path):
         pickle.dump(obj, f)
     os.replace(tmp, path)
 
-FAISS_INDEX_FILE = "index.faiss"
+#FAISS_INDEX_FILE = "index.faiss"
 
 def save_all():
     # ensure path is always a string
