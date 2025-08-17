@@ -69,7 +69,10 @@ def _safe_load_pickle(path, default):
 if os.path.exists(FAISS_INDEX_FILE):
     try:
         index = faiss.read_index(FAISS_INDEX_FILE)
-        if index.d != EMBED_DIM:
+        if not isinstance(index, faiss.Index):
+            print("⚠️ Loaded object is not a FAISS index. Reinitializing.")
+            index = faiss.IndexFlatL2(EMBED_DIM)
+        elif index.d != EMBED_DIM:
             print("⚠️ FAISS index dim mismatch; reinitializing.")
             index = faiss.IndexFlatL2(EMBED_DIM)
     except Exception as e:
@@ -77,6 +80,7 @@ if os.path.exists(FAISS_INDEX_FILE):
         index = faiss.IndexFlatL2(EMBED_DIM)
 else:
     index = faiss.IndexFlatL2(EMBED_DIM)
+
 
 metadata = _safe_load_pickle(METADATA_FILE, [])
 if not isinstance(metadata, list):
@@ -111,9 +115,15 @@ def save_all():
     print(">>> DEBUG save_all")
     print("Type of index:", type(index))
     print("FAISS_INDEX_FILE:", FAISS_INDEX_FILE, type(FAISS_INDEX_FILE))
-    faiss.write_index(index, str(FAISS_INDEX_FILE))  # force string path
+
+    if not isinstance(index, faiss.Index):
+        print("❌ save_all skipped: index is not a faiss.Index")
+        return
+
+    faiss.write_index(index, str(FAISS_INDEX_FILE))
     _atomic_pickle_dump(metadata, METADATA_FILE)
     _atomic_pickle_dump(pending_drafts, DRAFTS_FILE)
+    print(">>> DEBUG save_all completed")
 
 print("FAISS_INDEX_FILE:", FAISS_INDEX_FILE, type(FAISS_INDEX_FILE))
 
