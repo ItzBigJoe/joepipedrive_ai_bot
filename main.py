@@ -105,8 +105,11 @@ def _atomic_pickle_dump(obj, path):
         pickle.dump(obj, f)
     os.replace(tmp, path)
 
+FAISS_INDEX_FILE = "index.faiss"
+
 def save_all():
-    faiss.write_index(index, FAISS_INDEX_FILE)
+    faiss.write_index(index, FAISS_INDEX_FILE) 
+    
     _atomic_pickle_dump(metadata, METADATA_FILE)
     _atomic_pickle_dump(pending_drafts, DRAFTS_FILE)
 
